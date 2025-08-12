@@ -4,6 +4,7 @@ const StoreContext = createContext();
 
 export const StoreProvider = ({ children }) => {
   const [products, setProducts] = useState([]);
+   const [sortOption, setSortOption] = useState("");
 
   const fetchProduct = async () => {
     try {
@@ -19,13 +20,36 @@ export const StoreProvider = ({ children }) => {
   useEffect(() => {
     fetchProduct();
   }, []);
+   // Sorting logic
+  const sortedProducts = React.useMemo(() => {
+    let sorted = [...products];
+    switch (sortOption) {
+      case "price-asc":
+        sorted.sort((a, b) => a.price - b.price);
+        break;
+      case "price-desc":
+        sorted.sort((a, b) => b.price - a.price);
+        break;
+      case "rating":
+        sorted.sort((a, b) => b.rating.rate - a.rating.rate);
+        break;
+      case "category":
+        sorted.sort((a, b) => a.category.localeCompare(b.category));
+        break;
+      default:
+        break;
+    }
+    return sorted;
+  }, [products, sortOption]);
 
   return (
     <StoreContext.Provider
       value={{
-        products,
-        fetchProduct,
+        products: sortedProducts,
         setProducts,
+        sortOption,
+        setSortOption,
+
       }}
     >
       {children}
